@@ -9,7 +9,7 @@ Demonstrating **enterprise-grade network security** and **infrastructure managem
 - **TP-Link Managed Switch** - Managed switch for VLAN support
 - **TP-Link Access Point** - Access point with VLAN tagging
 - **Raspberry Pi** - Monitoring + DNS (AdGuard Home + Uptime Kuma)
-- **Mini PC** - Proxmox Node for virtualization
+- **Mini PC** - Proxmox Node for virtualization with Terraform IaC
 
 ### Network Diagram
 ![diagram](./network_diagram.jpg)
