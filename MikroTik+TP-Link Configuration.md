@@ -407,7 +407,33 @@ This configuration implements a segmented network using VLANs with the following
 ### Netwatch Monitoring
 ```bash
 # Monitor AdGuard Home availability and fallback to Google DNS
-/tool netwatch add comment="AdGuard Home Monitor" disabled=no down-script="/ip dns set servers=8.8.8.8,1.1.1.1" host=<ADGUARD_IP> http-codes="" interval=1m test-script="" timeout=5s type=simple up-script="/ip dns set servers=<ADGUARD_IP>"
+/tool netwatch add comment="AdGuard Home Monitor" disabled=no \
+    host=<ADGUARD_IP> interval=1m timeout=5s type=simple \
+    down-script="/ip dns set servers=8.8.8.8,1.1.1.1; \
+                 /tool fetch url=\"https://api.telegram.org/bot<YOUR_BOT_TOKEN>/sendMessage?chat_id=<YOUR_CHAT_ID>&text=AdGuard%20Home%20is%20DOWN\" keep-result=no" \
+    up-script="/ip dns set servers=<ADGUARD_IP>;"
+```
+
+### Daily SFTP Backup
+```bash
+# Backup the router and configuration daily and upload it to SFTP server
+/system scheduler
+add name=daily-sftp-backup interval=1d start-time=03:56:30 start-date=2025-08-19 \
+    on-event=sftp-backup-config \
+    policy=ftp,reboot,read,write,policy,test,password,sniff,sensitive,romon
+
+/system script
+add name=sftp-backup-config owner=frederique dont-require-permissions=yes \
+    policy=ftp,reboot,read,write,policy,test,password,sniff,sensitive,romon \
+    source="
+        /system backup save name=router-backup;
+        /tool fetch upload=yes url=\"sftp://<SFTP_IP>/home/mikrotik-backup/backups/router-backup.backup\" \
+            user=mikrotik-backup password=\"<SFTP_USER_PASSWORD>\" src-path=router-backup.backup;
+
+        /export file=router-config;
+        /tool fetch upload=yes url=\"sftp://<SFTP_IP>/home/mikrotik-backup/backups/router-config.rsc\" \
+            user=mikrotik-backup password=\"<SFTP_USER_PASSWORD>\" src-path=router-config.rsc;
+    "
 ```
 
 ### Enable VLAN Filtering
