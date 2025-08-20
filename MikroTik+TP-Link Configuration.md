@@ -265,6 +265,9 @@ This configuration implements a segmented network using VLANs with the following
 
 # Allow traffic from VPN clients
 /ip firewall filter add action=accept chain=input comment="Allow input from WireGuard VPN clients" in-interface=wireguard0
+
+# Allow API access from monitoring VM to router
+/ip firewall filter add action=accept chain=input comment="Allow router monitoring from VM" dst-port=8728 protocol=tcp src-address=<MKTXP_IP>
 ```
 
 ### Security Logging Rules
@@ -375,7 +378,7 @@ This configuration implements a segmented network using VLANs with the following
 /ip service set ssh disabled=yes
 /ip service set telnet disabled=yes
 /ip service set www disabled=yes
-/ip service set api disabled=yes
+/ip service set api address=<MKTXP_VM_IP>/32
 /ip service set api-ssl disabled=yes
 ```
 
@@ -434,6 +437,28 @@ add name=sftp-backup-config owner=frederique dont-require-permissions=yes \
         /tool fetch upload=yes url=\"sftp://<SFTP_IP>/home/mikrotik-backup/backups/router-config.rsc\" \
             user=mikrotik-backup password=\"<SFTP_USER_PASSWORD>\" src-path=router-config.rsc;
     "
+```
+
+### Network / Router Monitoring (Logs + MKTXP)
+```bash
+# Log format for MKTXCP
+/system logging
+set 0 action=remote disabled=yes prefix=:Info
+set 1 action=remote disabled=yes prefix=:Error
+set 2 action=remote disabled=yes prefix=:Warning
+set 3 action=remote disabled=yes prefix=:Critical
+add action=remote prefix=:Firewall topics=firewall
+add action=remote prefix=:Account topics=account
+add action=remote prefix=:Caps topics=caps
+add action=remote prefix=:Wireless topics=wireless
+
+# Remote action for logs
+/system logging action
+set remote=<MKTXP_IP> remote-port=514 remote-log-format=syslog syslog-facility=local0
+
+# User group for API user
+/user group
+add name=mktxp_group policy="read,api,!local,!telnet,!ssh,!ftp,!reboot,!write,!policy,!test,!winbox,!password,!web,!sniff,!sensitive,!romon,!rest-api"
 ```
 
 ### Enable VLAN Filtering
