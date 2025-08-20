@@ -309,8 +309,8 @@ This configuration implements a segmented network using VLANs with the following
 /ip firewall filter add action=accept chain=forward comment="Allow LAN to Servers" in-interface=vlan10-lan out-interface=vlan20-servers
 /ip firewall filter add action=accept chain=forward comment="Allow Servers to LAN" in-interface=vlan20-servers out-interface=vlan10-lan
 
-# Allow ssh access from VM to Pi for mounting SSHFS shares + monitoring
-/ip firewall filter add action=accept chain=forward comment="Allow VM "docker-host" to Pi for managing files in code-server + Prometheus" dst-address=<PI_IP> dst-port=22,9100 protocol=tcp src-address=<VM_IP>
+# Allow VM "docker-host" to Pi: ssh, prometheus, portainer
+/ip firewall filter add action=accept chain=forward comment="Allow VM "docker-host" to Pi for managing files in code-server + Prometheus" dst-address=<PI_IP> dst-port=22,9100,9001 protocol=tcp src-address=<VM_IP>
 ```
 
 ### Chromecast/Streaming Device Rules
