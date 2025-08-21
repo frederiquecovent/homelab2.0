@@ -1,15 +1,29 @@
-http://glances.acacia {
+# copy cert from caddy:/data/caddy/pki/authorities/local/root.crt to pc and install under "Trusted Root Certification Authorities"
+
+{
+    local_certs
+}
+
+glances.acacia {
     reverse_proxy <PI_IP>:61208
 }
 
-http://adguardhome.acacia {
+adguardhome.acacia {
     reverse_proxy <PI_IP>:8080
 }
 
-http://uptimekuma.acacia {
+uptimekuma.acacia {
     reverse_proxy <PI_IP>:3001
 }
 
-http://code.acacia {
+code.acacia {
     reverse_proxy <VM_IP>:8443
+}
+
+grafana.acacia {
+    reverse_proxy <VM_IP>:3000
+}
+
+portainer.acacia {
+    reverse_proxy <VM_IP>:9000
 }
