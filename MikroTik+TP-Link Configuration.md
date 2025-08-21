@@ -305,6 +305,9 @@ This configuration implements a segmented network using VLANs with the following
 # Allow communication between LAN and Servers
 /ip firewall filter add action=accept chain=forward comment="Allow LAN to Servers" in-interface=vlan10-lan out-interface=vlan20-servers
 
+# Allow reverse proxy access from LAN
+/ip firewall filter add action=accept chain=forward comment="Allow LAN to Pi: reverse proxy" dst-address=<CADDY_IP> dst-port=80,443 in-interface=vlan10-lan protocol=tcp
+
 # Allow VM "docker-host" to Pi: ssh, prometheus, portainer
 /ip firewall filter add action=accept chain=forward comment="Allow VM "docker-host" to Pi for managing files in code-server + Prometheus" dst-address=<PI_IP> dst-port=22,9100,9001 protocol=tcp src-address=<VM_IP>
 ```
