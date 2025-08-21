@@ -244,9 +244,6 @@ This configuration implements a segmented network using VLANs with the following
 # Block WAN traffic not destined for router
 /ip firewall filter add action=drop chain=input comment="Drop WAN traffic not for router" dst-address-type=!local in-interface=ether1
 
-# Allow HTTPS access from management VLAN
-/ip firewall filter add action=accept chain=input comment="Allow HTTPS from management VLAN" dst-port=443 in-interface=vlan99-mgmt protocol=tcp
-
 # Allow Winbox access from management VLAN
 /ip firewall filter add action=accept chain=input comment="Allow Winbox from management VLAN" dst-port=8291 in-interface=vlan99-mgmt protocol=tcp
 
@@ -305,9 +302,8 @@ This configuration implements a segmented network using VLANs with the following
 # Block guest network from internal networks
 /ip firewall filter add action=drop chain=forward comment="Block guest from internal networks" in-interface=vlan40-guest out-interface-list=LAN
 
-# Allow bidirectional communication between LAN and Servers
+# Allow communication between LAN and Servers
 /ip firewall filter add action=accept chain=forward comment="Allow LAN to Servers" in-interface=vlan10-lan out-interface=vlan20-servers
-/ip firewall filter add action=accept chain=forward comment="Allow Servers to LAN" in-interface=vlan20-servers out-interface=vlan10-lan
 
 # Allow VM "docker-host" to Pi: ssh, prometheus, portainer
 /ip firewall filter add action=accept chain=forward comment="Allow VM "docker-host" to Pi for managing files in code-server + Prometheus" dst-address=<PI_IP> dst-port=22,9100,9001 protocol=tcp src-address=<VM_IP>
@@ -323,10 +319,6 @@ This configuration implements a segmented network using VLANs with the following
 
 # Allow Chromecast media streaming (IoT to LAN)
 /ip firewall filter add action=accept chain=forward comment="Allow Chromecasts to send UDP traffic from any port to ports 32768-61000 on any client on the Main LAN" dst-port=32768-61000 in-interface=vlan30-iot out-interface=vlan10-lan protocol=udp
-
-# Allow Spotify Connect protocol
-/ip firewall filter add action=accept chain=forward comment="Allow LAN to Spotify UDP port" dst-port=4070 in-interface=vlan10-lan out-interface=vlan30-iot protocol=udp
-/ip firewall filter add action=accept chain=forward comment="Allow LAN to Spotify TCP port" dst-port=4070 in-interface=vlan10-lan out-interface=vlan30-iot protocol=tcp
 ```
 
 #### Note: the above firewall rules were needed to allow casting to Chromecasts, Smart TVs, Google Home devices, etc.
@@ -362,9 +354,6 @@ This configuration implements a segmented network using VLANs with the following
 ```bash
 # Masquerade for internet access
 /ip firewall nat add action=masquerade chain=srcnat out-interface=ether1
-
-# NAT for WireGuard VPN clients
-/ip firewall nat add action=masquerade chain=srcnat comment="NAT for WireGuard VPN clients" out-interface=ether1 src-address=10.100.100.0/24
 ```
 
 ---
