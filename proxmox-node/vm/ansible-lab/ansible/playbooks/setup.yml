@@ -1,0 +1,5 @@
+- name: Run common setup on all hosts
+  hosts: all
+  become: true   # run with sudo
+  roles:
+    - common

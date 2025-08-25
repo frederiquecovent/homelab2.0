@@ -1,0 +1,4 @@
+example:
+
+ansible-vault create inventories/host_vars/docker-host.yml
+ansible_become_password: "<PASSWORD>"
