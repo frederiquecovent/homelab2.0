@@ -19,5 +19,6 @@ variable "lxc_ssh_pubkey" { type = string }
 variable "vm_names" { type = list(string) }
 variable "vm_template" { type = string }
 variable "vm_cores" { type = list(number) }
-variable "vm_memory" { type = list(number) }       # MB
+variable "vm_memory" { type = list(number) }       # MB - maximum
+variable "vm_balloon" { type = list(number) }      # MB - minimum
 variable "vm_disk_size" { type = string}           # Needs to match template disk size

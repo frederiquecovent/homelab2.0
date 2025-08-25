@@ -14,8 +14,10 @@ lxc_password    = "<DEFAULT_PASSWORD>"
 lxc_ssh_pubkey  = "<PATH_TO_PUBKEY>"
 
 # VM Configuration (Template-based)
-vm_names      = ["docker-host"]
+vm_names      = ["docker-host", "sftp", "ansible-lab"]
 vm_template   = "ubuntu-server-template"
-vm_cores      = [2]
-vm_memory     = [4096]
-vm_disk_size  = "32G"                # Has to match template disk size
+vm_cores      = [2, 1, 1]
+vm_memory     = [8192, 2048, 4096]    # max memory
+vm_balloon    = [4096, 1024, 2048]    # min memory (ballooning)
+vm_disk_size  = "32G"		      # Has to match template disk size
+

@@ -10,7 +10,8 @@ resource "proxmox_vm_qemu" "vm" {
   cpu {
     cores = var.vm_cores[count.index]
   }
-  memory = var.vm_memory[count.index]
+  memory = var.vm_memory[count.index]    # maximum
+  balloon = var.vm_balloon[count.index]  # minimum
 
   # Main disk - cloned from template
   disks {
