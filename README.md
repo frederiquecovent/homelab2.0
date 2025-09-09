@@ -16,6 +16,9 @@ Demonstrating **enterprise-grade network security** and **infrastructure managem
 ### Network Diagram
 ![diagram](./network-diagram.jpg)
 
+### Public Stats
+[Grafana](https://coventix.be/grafana)
+
 ## Included
 
 ### Network Infrastructure
