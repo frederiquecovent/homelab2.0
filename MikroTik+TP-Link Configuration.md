@@ -318,7 +318,7 @@ This configuration implements a segmented network using VLANs with the following
 # Block guest network from internal networks
 /ip firewall filter add action=drop chain=forward comment="Block guest from internal networks" in-interface=vlan40-guest out-interface-list=LAN
 
-# Allow communication between LAN <-> Servers
+# Allow communication between LAN <-> VCN
 /ip firewall filter add action=accept chain=forward comment="Allow all traffic between LAN and VCN" dst-address=10.0.0.0/16 in-interface-list=LAN
 /ip firewall filter add action=accept chain=forward comment="Allow all traffic between LAN and VCN" out-interface-list=LAN src-address=10.0.0.0/16
 
