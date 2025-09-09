@@ -3,39 +3,61 @@
 # VMs configuration
 locals {
   vms = {
-    "web-server" = {
+    "monitoring" = {
       node      = "pve1"
       vm_id     = 100
       cores     = 2
-      memory    = 2048
-      disk_size = 20
+      memory    = 8192
+      disk_size = 50
     }
-    "db-server" = {
+    "nginx1" = {
       node      = "pve2"
       vm_id     = 101
-      cores     = 4
+      cores     = 2
       memory    = 4096
-      disk_size = 50
+      disk_size = 15
+    }
+    "nginx2" = {
+      node      = "pve3"
+      vm_id     = 102
+      cores     = 2
+      memory    = 4096
+      disk_size = 15
+    }
+    "loadbalancer" = {
+      node      = "pve1"
+      vm_id     = 103
+      cores     = 2
+      memory    = 4096
+      disk_size = 15
     }
   }
 
   # LXC containers configuration
   lxcs = {
-    "docker-host" = {
-      node       = "pve3"
+    "sftp" = {
+      node       = "pve2"
       vm_id      = 200
       cores      = 2
       memory     = 1024
       disk_size  = 30
-      privileged = true
+      privileged = false
     }
-    "monitoring" = {
+    "portainer" = {
       node       = "pve1"
       vm_id      = 201
-      cores      = 1
-      memory     = 512
-      disk_size  = 10
-      privileged = false
+      cores      = 2
+      memory     = 1024
+      disk_size  = 15
+      privileged = true
+    }
+    "smb" = {
+      node       = "pve3"
+      vm_id      = 202
+      cores      = 2
+      memory     = 2048
+      disk_size  = 100
+      privileged = true
     }
   }
 }

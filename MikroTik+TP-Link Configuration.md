@@ -3,12 +3,13 @@
 ## Network Architecture Overview
 
 This configuration implements a segmented network using VLANs with the following structure:
-- **VLAN 10:** Main LAN (10.10.10.0/24)
-- **VLAN 20:** Servers (10.10.20.0/24)
-- **VLAN 30:** IoT Devices (10.10.30.0/24)
-- **VLAN 40:** Guest Network (10.10.40.0/24)
-- **VLAN 99:** Management (10.10.99.0/24)
+- **VLAN 10:** Main LAN (192.168.10.0/24)
+- **VLAN 20:** Servers (192.168.20.0/24)
+- **VLAN 30:** IoT Devices (192.168.30.0/24)
+- **VLAN 40:** Guest Network (192.168.40.0/24)
+- **VLAN 99:** Management (192.168.99.0/24)
 - **WireGuard VPN:** Remote access (10.100.100.0/24)
+- **Oracle VCN:** Cloudlab (10.0.0.0/16)
 
 **mDNS is used together with MACVLANs and a bridge to make casting work from VLAN10 -> VLAN30**
 
@@ -37,8 +38,11 @@ This configuration implements a segmented network using VLANs with the following
 
 ### WireGuard VPN Interface
 ```bash
-# WireGuard VPN server listening on port 51820
+# WireGuard VPN server listening on port 51820 (personal)
 /interface wireguard add listen-port=51820 mtu=1420 name=wireguard0 private-key="<PRIVATE_KEY>"
+
+# WireGuard VPN server listening on port 51821 (cloudlab)
+/interface wireguard add listen-port=51821 mtu=1420 name=wireguard-oracle private-key="<PRIVATE_KEY>"
 ```
 
 ### VLAN Interfaces
@@ -84,19 +88,19 @@ This configuration implements a segmented network using VLANs with the following
 ### IP Address Pools
 ```bash
 # DHCP pool for main LAN devices
-/ip pool add name=pool-lan ranges=10.10.10.100-10.10.10.200
+/ip pool add name=pool-lan ranges=192.168.10.100-192.168.10.200
 
 # DHCP pool for server network
-/ip pool add name=pool-servers ranges=10.10.20.100-10.10.20.200
+/ip pool add name=pool-servers ranges=192.168.20.100-192.168.20.200
 
 # DHCP pool for IoT devices
-/ip pool add name=pool-iot ranges=10.10.30.100-10.10.30.200
+/ip pool add name=pool-iot ranges=192.168.30.100-192.168.30.200
 
 # DHCP pool for guest devices
-/ip pool add name=pool-guest ranges=10.10.40.100-10.10.40.200
+/ip pool add name=pool-guest ranges=192.168.40.100-192.168.40.200
 
 # DHCP pool for management devices
-/ip pool add name=pool-mgmt ranges=10.10.99.100-10.10.99.200
+/ip pool add name=pool-mgmt ranges=192.168.99.100-192.168.99.200
 ```
 
 ### DHCP Servers
@@ -120,25 +124,25 @@ This configuration implements a segmented network using VLANs with the following
 ### DHCP Networks
 ```bash
 # DHCP network configuration for LAN
-/ip dhcp-server network add address=10.10.10.0/24 dns-server=10.10.10.1 gateway=10.10.10.1
+/ip dhcp-server network add address=192.168.10.0/24 dns-server=192.168.10.1 gateway=192.168.10.1
 
 # DHCP network configuration for servers
-/ip dhcp-server network add address=10.10.20.0/24 dns-server=10.10.20.1 gateway=10.10.20.1
+/ip dhcp-server network add address=192.168.20.0/24 dns-server=192.168.20.1 gateway=192.168.20.1
 
 # DHCP network configuration for IoT devices
-/ip dhcp-server network add address=10.10.30.0/24 dns-server=10.10.30.1 gateway=10.10.30.1
+/ip dhcp-server network add address=192.168.30.0/24 dns-server=192.168.30.1 gateway=192.168.30.1
 
 # DHCP network configuration for guest network
-/ip dhcp-server network add address=10.10.40.0/24 dns-server=10.10.40.1 gateway=10.10.40.1
+/ip dhcp-server network add address=192.168.40.0/24 dns-server=192.168.40.1 gateway=192.168.40.1
 
 # DHCP network configuration for management network
-/ip dhcp-server network add address=10.10.99.0/24 dns-server=10.10.99.1 gateway=10.10.99.1
+/ip dhcp-server network add address=192.168.99.0/24 dns-server=192.168.99.1 gateway=192.168.99.1
 ```
 
 ### Static DHCP Lease
 ```bash
-# Static IP assignment for management device (Raspberry Pi)
-/ip dhcp-server lease add address=<STATIC_IP> client-id=<CLIENT_ID> mac-address=<MAC_ADDRESS> server=dhcp-mgmt
+# Static IP assignments
+/ip dhcp-server lease add address=<STATIC_IP> client-id=<CLIENT_ID> mac-address=<MAC_ADDRESS> server=dhcp-<VLAN>
 ```
 
 ---
@@ -186,22 +190,25 @@ This configuration implements a segmented network using VLANs with the following
 
 ```bash
 # Gateway IP for main LAN network
-/ip address add address=10.10.10.1/24 interface=vlan10-lan network=10.10.10.0
+/ip address add address=192.168.10.1/24 interface=vlan10-lan network=192.168.10.0
 
 # Gateway IP for server network
-/ip address add address=10.10.20.1/24 interface=vlan20-servers network=10.10.20.0
+/ip address add address=192.168.20.1/24 interface=vlan20-servers network=192.168.20.0
 
 # Gateway IP for IoT network
-/ip address add address=10.10.30.1/24 interface=vlan30-iot network=10.10.30.0
+/ip address add address=192.168.30.1/24 interface=vlan30-iot network=192.168.30.0
 
 # Gateway IP for guest network
-/ip address add address=10.10.40.1/24 interface=vlan40-guest network=10.10.40.0
+/ip address add address=192.168.40.1/24 interface=vlan40-guest network=192.168.40.0
 
 # Gateway IP for management network
-/ip address add address=10.10.99.1/24 interface=vlan99-mgmt network=10.10.99.0
+/ip address add address=192.168.99.1/24 interface=vlan99-mgmt network=192.168.99.0
 
-# WireGuard VPN server IP
+# WireGuard VPN server IP (personal)
 /ip address add address=10.100.100.1/24 interface=wireguard0 network=10.100.100.0
+
+# WireGuard VPN server IP (cloudlab)
+/ip address add address=10.0.254.2/24 interface=wireguard-oracle network=10.0.254.0
 ```
 
 ---
@@ -215,6 +222,9 @@ This configuration implements a segmented network using VLANs with the following
 
 # iPhone VPN client configuration
 /interface wireguard peers add allowed-address=10.100.100.3/32 interface=wireguard0 name=iPhone public-key="<PUBLIC_KEY>"
+
+# Oracle Instance running WireGuard
+/interface wireguard peersadd allowed-address=10.0.254.1/32,10.0.0.0/16 interface=wireguard-oracle name=vm-oracle public-key="<PUBLIC_KEY>"
 ```
 
 ---
@@ -257,11 +267,17 @@ This configuration implements a segmented network using VLANs with the following
 # Allow ICMP from all VLANs
 /ip firewall filter add action=accept chain=input comment="Allow ICMP from VLANs" in-interface-list=LAN protocol=icmp
 
-# Allow WireGuard VPN connections from WAN
+# Allow WireGuard VPN connections from WAN (personal)
 /ip firewall filter add action=accept chain=input comment="Allow WireGuard VPN" dst-port=51820 in-interface=ether1 protocol=udp
 
-# Allow traffic from VPN clients
+# Allow WireGuard VPN connections from WAN (cloudlab)
+/ip firewall filter add action=accept chain=input comment="Allow WireGuard VPN - Oracle" dst-port=51821 in-interface=ether1 protocol=udp
+
+# Allow traffic from VPN clients (personal)
 /ip firewall filter add action=accept chain=input comment="Allow input from WireGuard VPN clients" in-interface=wireguard0
+
+# Allow traffic from VPN clients (cloudlab)
+/ip firewall filter add action=accept chain=input comment="Allow input from WireGuard VPN clients - Oracle" in-interface=wireguard-oracle
 
 # Allow API access from monitoring VM to router
 /ip firewall filter add action=accept chain=input comment="Allow router monitoring from VM" dst-port=8728 protocol=tcp src-address=<MKTXP_IP>
@@ -302,14 +318,25 @@ This configuration implements a segmented network using VLANs with the following
 # Block guest network from internal networks
 /ip firewall filter add action=drop chain=forward comment="Block guest from internal networks" in-interface=vlan40-guest out-interface-list=LAN
 
+# Allow communication between LAN <-> Servers
+/ip firewall filter add action=accept chain=forward comment="Allow all traffic between LAN and VCN" dst-address=10.0.0.0/16 in-interface-list=LAN
+/ip firewall filter add action=accept chain=forward comment="Allow all traffic between LAN and VCN" out-interface-list=LAN src-address=10.0.0.0/16
+
 # Allow communication between LAN and Servers
 /ip firewall filter add action=accept chain=forward comment="Allow LAN to Servers" in-interface=vlan10-lan out-interface=vlan20-servers
 
 # Allow reverse proxy access from LAN
 /ip firewall filter add action=accept chain=forward comment="Allow LAN to Pi: reverse proxy" dst-address=<CADDY_IP> dst-port=80,443 in-interface=vlan10-lan protocol=tcp
 
-# Allow VM "docker-host" to Pi: ssh, prometheus, portainer
-/ip firewall filter add action=accept chain=forward comment="Allow VM "docker-host" to Pi for managing files in code-server + Prometheus" dst-address=<PI_IP> dst-port=22,9100,9001 protocol=tcp src-address=<VM_IP>
+# Allow VM "monitoring" to Pi: ssh, prometheus
+/ip firewall filter add action=accept chain=forward comment="Allow VM "monitoring" to Pi for managing files in code-server + Prometheus" dst-address=<PI_IP> dst-port=22,9100 protocol=tcp src-address=<VM_IP>
+
+# Allow LXC "portainer" to Pi and "monitoring" VM
+/ip firewall filter add action=accept chain=forward comment="Allow LXC "portainer" to Pi and "monitoring" VM" dst-address-list= portainer_targets dst-port=9001 protocol=tcp src-address=<LXC_IP>
+
+/ip firewall address-list
+add address=<PI_IP> list=portainer_targets
+add address=<VM_IP> list=portainer_targets
 ```
 
 ### Chromecast/Streaming Device Rules
@@ -361,6 +388,15 @@ This configuration implements a segmented network using VLANs with the following
 
 ---
 
+## Static Routes
+
+```bash
+# Static route to cloudlab via WireGuard interface
+/ip route add dst-address=10.0.0.0/16 gateway=wireguard-oracle
+```
+
+---
+
 ## System Services
 
 ### Disabled Services (Security)
@@ -383,21 +419,6 @@ This configuration implements a segmented network using VLANs with the following
 ---
 
 ## Monitoring and Logging
-
-### Network Discovery
-```bash
-# Disable neighbor discovery on dynamic interfaces
-/ip neighbor discovery-settings set discover-interface-list=!dynamic
-```
-
-### System Configuration
-```bash
-# Set timezone
-/system clock set time-zone-name=<TIMEZONE>
-
-# Set router hostname
-/system identity set name=<HOSTNAME>
-```
 
 ### Netwatch Monitoring
 ```bash
