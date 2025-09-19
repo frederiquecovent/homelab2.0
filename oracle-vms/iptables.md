@@ -5,7 +5,7 @@ Firewalling is applied with **iptables-persistent** for extra security
 
 ### VM1 — WireGuard Gateway (10.0.0.5)
 
-**Purpose:** Terminates WireGuard, forwards traffic into the OCI subnet, exposes node_exporter for monitoring.  
+**Purpose:** Terminates WireGuard, forwards traffic into the OCI subnet, exposes node_exporter for monitoring. Also acts as loadbalancer for custom nginx application (running on VM2 and on VM in homelab)
 
 Ruleset (`/etc/iptables/rules.v4`):
 
@@ -43,7 +43,7 @@ COMMIT
 
 ### VM2 — Private Node (10.0.0.27)
 
-**Purpose:** Application/monitoring target. Accessible only via WireGuard through VM1. 
+**Purpose:** Application/monitoring target. Accessible only via WireGuard through VM1. Also allow http, https and icmp from VM1.
 
 Ruleset (`/etc/iptables/rules.v4`):
 
@@ -66,7 +66,16 @@ Ruleset (`/etc/iptables/rules.v4`):
 -A INPUT -s <VM_IP>/32 -p tcp --dport 9100 -j ACCEPT
 
 # ICMP echo-request (ping) from homelab
--A INPUT -s 192.168.0.0/17 -p icmp --icmp-type 8 -j ACCEPT
+-A INPUT -s 192.168.0.0/17 -p icmp -j ACCEPT
+
+# HTTP from VM1
+-A INPUT -s 10.0.0.5/32 -p tcp -m tcp --dport 80 -j ACCEPT
+
+# HTTPS from VM1
+-A INPUT -s 10.0.0.5/32 -p tcp -m tcp --dport 443 -j ACCEPT
+
+# ICMP echo-request (ping) from VM1
+-A INPUT -s 10.0.0.5/32 -p icmp -j ACCEPT
 
 COMMIT
 ```
