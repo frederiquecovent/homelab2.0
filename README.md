@@ -1,48 +1,72 @@
-# Homelab 2.0
+# 🏠 Homelab 2.0
 
-Demonstrating **enterprise-grade network security** and **infrastructure management**.
+My over-engineered home network that probably went too far, but here we are.
 
-## Architecture Overview
+## What is this?
 
-**Homelab 2.0** consisting of:
-- **MikroTik Router** - Router with VLAN segmentation and WireGuard VPN
-- **TP-Link Managed Switch** - Managed switch for VLAN support
-- **TP-Link Access Point** - Access point with VLAN tagging
-- **Raspberry Pi** - Monitoring + DNS + Reverse Proxy (AdGuard Home + Uptime Kuma + Caddy)
-- **Proxmox Cluster** - 3-node cluster running high availability workloads with Terraform IaC
-- **Oracle CloudLab** - VCN with 2 instances (one acting as WireGuard client to seamlessly connect to homelab)
-- **Storage & Backup** - SMB-based NAS + SFTP backup service
+Enterprise-grade networking at home because I got tired of my ISP's router and things spiraled from there. VLANs, high availability clusters, hybrid cloud — the works.
 
-### Network Diagram
+<table>
+<tr>
+<td align="center">
+  <a href="https://grafana.coventix.be/public-dashboards/9c317975a88a4d93ac518a766fde8ec9">
+    <img src="./images/grafana-preview.jpg" width="400px" alt="Grafana"/>
+    <br/>📊 Live Stats
+  </a>
+</td>
+<td align="center">
+  <a href="https://uptime.coventix.be/status/acacia">
+    <img src="./images/uptime-preview.jpg" width="400px" alt="Uptime"/>
+    <br/>⚡ Uptime Monitor
+  </a>
+</td>
+</tr>
+</table>
+
+## The Setup
+
+**MikroTik Router** — Handles VLANs, WireGuard VPN, and keeps everything locked down  
+**TP-Link Switch & AP** — VLAN support across wired and wireless  
+**Raspberry Pi** — Running DNS, monitoring, and reverse proxy  
+**Proxmox Cluster** — 3 nodes for high availability, all managed with Terraform  
+**Oracle Cloud** — 2 free tier instances connected via WireGuard tunnel  
+**Storage** — SMB file shares and automated backups
+
+## 🗺️ Network Diagram
+
 ![diagram](./network-diagram.jpg)
+*The whole shebang*
 
-### Public Stats
-[Grafana](https://coventix.be/grafana)
+## Why though?
 
-## Included
+**Security** — Separate VLANs for different device types. IoT devices can't see my main network, guests get their own isolated WiFi, servers are locked down. Default deny firewall rules for everything.
 
-### Network Infrastructure
-- **VLAN Segmentation**: Separate networks for LAN, servers, IoT, guests, and management
-- **WireGuard VPN**: Secure remote access with key-based authentication
-- **Firewall Configuration**: Comprehensive security rules with logging
-- **mDNS Bridging**: Enables casting between VLANs for IoT devices
-- **Oracle VCN Integration**: Extends the homelab network into Oracle Cloud with WireGuard for seamless hybrid connectivity
+**High Availability** — The Proxmox cluster runs 2 nginx containers on different nodes with a HAProxy load balancer on a third. If a node dies, services keep running.
 
-### Services & Monitoring
-- **AdGuard Home**: DNS ad-blocking and filtering
-- **Uptime Kuma**: Service monitoring and uptime tracking
-- **Caddy**: Reverse proxy for internal services
-- **Proxmox**: Infrastructure as Code with Terraform for self-hosted applications
-- **Proxmox Cluster HA Web Service**:
-  - 2 **Nginx containers** running on different Proxmox nodes  
-  - 1 **Load balancer container** on a third node for redundancy and distribution (HaProxy)  
-- **Code-server**: Web-based IDE with SSHFS-mounted home directories across all devices for seamless configuration management
-- **SMB "NAS"**: Shared file storage across the homelab
-- **SFTP Router Backup**: Automated backup service for router configs
+**Cloud Integration** — Oracle Cloud instances are connected via WireGuard, basically extending the homelab. Useful for external monitoring and testing cloud stuff.
 
-### Security Features
-- **Guest Network Isolation**: Complete separation from internal resources
-- **Management Network**: Dedicated VLAN for administrative access
-- **Comprehensive Logging**: Security event monitoring and alerting
-- **Default Deny Firewall**: Secure by default configuration
-- **Hybrid Security**: Oracle Cloud instances secured with WireGuard, Security Lists and Network Security Groups (Inbound access via WireGuard; Outbound via NAT Gateway)
+**Self-Hosted Everything** — AdGuard Home for DNS, Advanced monitoring (Grafana, Prometheus, Uptimekuma, MKTXP, ...), Caddy for reverse proxy, Code-server for editing configs from anywhere.
+
+**Infrastructure as Code** — The entire Proxmox setup is managed with Terraform. No clicking through UIs, everything's version controlled.
+
+## ✨ Cool Stuff
+
+**mDNS bridging** — IoT devices can still cast to TVs even though they're on different VLANs.
+
+**VLAN-tagged WiFi** — One access point, multiple isolated wireless networks. Each WiFi network maps to its own VLAN.
+
+**SSHFS home directories** — Code-server mounts my home directory from everywhere, so I can edit any config file from a browser.
+
+**Automated backups** — Router configs get backed up to an SFTP server automatically. Because losing config is the worst.
+
+## 🌐 Network Breakdown
+
+- **VLAN 10** — Main LAN, full access
+- **VLAN 20** — Servers, restricted and monitored  
+- **VLAN 30** — IoT devices, internet + mDNS only
+- **VLAN 40** — Guest network, completely isolated
+- **VLAN 99** — Management, admin access only
+
+---
+
+That's it. It's probably overkill but it works and I learned a ton building it. 🚀
